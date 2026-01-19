@@ -1,0 +1,78 @@
+// Prisma schema for rule-based derma engine
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model DiagnosisTemplate {
+  id           Int      @id @default(autoincrement())
+  name         String
+  description  String
+  visibilityInOptions Boolean @map("visibility_in_options")
+  diagnosisMessage    String  @map("diagnosis_message")
+  treatmentMessage    String  @map("treatment_message")
+  products     Json
+  productUsage Json    @map("product_usage")
+  notes        String
+  additionalInfoHtml String @map("additional_info_html")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("DIAGNOSIS_TEMPLATE")
+}
+
+model LongevityTemplate {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  aditionalText String @map("aditional_text")
+  products    Json
+  behavioralModification String @map("behavioral_modification")
+  inofficeTreatment      String @map("inoffice_treatment")
+
+  @@map("LONGEVITY_TEMPLATE")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  shopifyUrl  String   @map("shopify_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("PRODUCT")
+}
+
+model Kickout {
+  id        Int      @id @default(autoincrement())
+  title     String
+  message   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("KICKOUT")
+}
+
+model SkinConcernDiagnosisMap {
+  id        Int      @id @default(autoincrement())
+  concernName String @map("concern_name")
+  rules     Json
+
+  @@map("SKIN_CONCERN_DIAGNOSIS_MAP")
+}
+
+model AppointmentReport {
+  id            Int      @id @default(autoincrement())
+  appointmentId Int      @unique @map("appointment_id")
+  diagnosisIds  Int[]    @map("diagnosis_ids")
+  longevityIds  Int[]    @map("longevity_ids")
+  videoIds      Int[]    @map("video_ids")
+  kickoutId     Int?     @map("kickout_id")
+
+  @@map("APPOINTMENT_REPORT")
+}
