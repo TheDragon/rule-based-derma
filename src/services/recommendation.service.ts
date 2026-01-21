@@ -48,7 +48,6 @@ export async function evaluateRecommendations(
     appointmentId,
     diagnosisIds: evaluation.diagnosis_ids,
     longevityIds: evaluation.longevity_ids,
-    videoIds: evaluation.video_ids,
     kickoutId: evaluation.kickout_id
   };
 

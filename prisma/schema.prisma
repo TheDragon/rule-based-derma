@@ -1,5 +1,3 @@
-// Prisma schema for rule-based derma engine
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,29 +7,66 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String
+  dateOfBirth DateTime @map("date-of-birth")
+  gender      String
+  userLink    String   @map("user_link")
+
+  @@map("USER")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  questions   Json
+  isActive    Boolean  @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("CATEGORY")
+}
+
+model Question {
+  id          String       @id
+  categoryId  String       @map("category_id")
+  orderIndex  Int          @map("order")
+  text        String
+  description String
+  type        QuestionType
+  isRequired  Boolean
+  options     Json
+  config      Json
+  isActive    Boolean      @map("is_active")
+
+  @@map("QUESTION")
+}
+
 model DiagnosisTemplate {
-  id           Int      @id @default(autoincrement())
-  name         String
-  description  String
-  visibilityInOptions Boolean @map("visibility_in_options")
-  diagnosisMessage    String  @map("diagnosis_message")
-  treatmentMessage    String  @map("treatment_message")
-  products     Json
-  productUsage Json    @map("product_usage")
-  notes        String
-  additionalInfoHtml String @map("additional_info_html")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id                   Int      @id @default(autoincrement())
+  name                 String
+  description          String
+  visibilityInOptions  Boolean  @map("visibility_in_options")
+  diagnosisMessage     String   @map("diagnosis_message")
+  treatmentInstruction String   @map("treatment_instruction")
+  products             Json
+  comment              String   @map("comment")
+  videoIds             Int[]    @map("video_ids")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
 
   @@map("DIAGNOSIS_TEMPLATE")
 }
 
 model LongevityTemplate {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String
-  aditionalText String @map("aditional_text")
-  products    Json
+  id                     Int    @id @default(autoincrement())
+  name                   String
+  description            String
+  aditionalText          String @map("aditional_text")
+  products               Json
   behavioralModification String @map("behavioral_modification")
   inofficeTreatment      String @map("inoffice_treatment")
 
@@ -39,12 +74,17 @@ model LongevityTemplate {
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String
-  shopifyUrl  String   @map("shopify_url")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id                  Int              @id @default(autoincrement())
+  name                String
+  diagnosisId         Int              @map("diagnosis_id")
+  shopifyUrl          String           @map("shopify_url")
+  productDescription  String           @map("product_description")
+  productType         String[]         @map("product_type")
+  stage               ApplicationStage
+  productInstructions String           @map("product_instructions")
+  notes               String
+  createdAt           DateTime         @default(now()) @map("created_at")
+  updatedAt           DateTime         @updatedAt @map("updated_at")
 
   @@map("PRODUCT")
 }
@@ -59,20 +99,54 @@ model Kickout {
 }
 
 model SkinConcernDiagnosisMap {
-  id        Int      @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   concernName String @map("concern_name")
-  rules     Json
+  rules       Json
 
   @@map("SKIN_CONCERN_DIAGNOSIS_MAP")
 }
 
 model AppointmentReport {
-  id            Int      @id @default(autoincrement())
-  appointmentId Int      @unique @map("appointment_id")
-  diagnosisIds  Int[]    @map("diagnosis_ids")
-  longevityIds  Int[]    @map("longevity_ids")
-  videoIds      Int[]    @map("video_ids")
-  kickoutId     Int?     @map("kickout_id")
+  id            Int   @id @default(autoincrement())
+  appointmentId Int   @unique @map("appointment_id")
+  diagnosisIds  Int[] @map("diagnosis_ids")
+  longevityIds  Int[] @map("longevity_ids")
+  kickoutId     Int?  @map("kickout_id")
 
   @@map("APPOINTMENT_REPORT")
+}
+
+model Appointment {
+  id        String   @id
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("APPOINTMENT")
+}
+
+model Answer {
+  id            String   @id
+  appointmentId String   @map("apppointment_id")
+  questionId    String   @map("question_id")
+  value         Json
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("ANSWER")
+}
+
+enum QuestionType {
+  single_select
+  multi_select
+  text
+  number
+  boolean
+  date
+}
+
+enum ApplicationStage {
+  cleansing
+  mix_products
+  sunblock_foundation
 }
